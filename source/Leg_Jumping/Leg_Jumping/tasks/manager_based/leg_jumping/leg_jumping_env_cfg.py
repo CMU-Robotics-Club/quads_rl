@@ -192,7 +192,8 @@ class RewardsCfg:
         # weight=-17.0,
         # weight=-40.0,
         # weight=-70.0,
-        weight=-200.0,
+        # weight=-200.0,
+        weight=-220.0,
         params={"asset_cfg": SceneEntityCfg("robot", body_names=["foot_link", "slider"])}
     )
 
