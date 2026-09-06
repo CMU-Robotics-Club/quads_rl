@@ -5,7 +5,7 @@ This README is written and verified by humans. So please read this carefully!
 
 # Setup
 
-We'll put our code in /Documents since that's what I did
+We'll put our code in ~/Documents since that's what I did
 
 Run every command here sequentially. Some installations may take up to a few minutes:
 
