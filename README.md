@@ -47,4 +47,5 @@ alias iltrain='cd ~/Documents/laika_rl/leg_jumping_rl/Leg_Jumping && ish -p scri
 alias ilplay='ish -p ~/Documents/laika_rl/leg_jumping_rl/Leg_Jumping/scripts/rsl_rl/play.py --task Leg-Jumping-v0 --num_envs 1'
 ```
 
-Now run iltrain to train, and ilplay to play the most recent trained policy
+IMPORTANT: run `isact` before running anything to source your environment
+Now run `iltrain` to train leg jumping, and `ilplay` to play the most recent trained policy
