@@ -47,14 +47,17 @@ alias iltrain='cd ~/Documents/laika_rl/leg_jumping_rl/Leg_Jumping && ish -p scri
 alias ilplay='ish -p ~/Documents/laika_rl/leg_jumping_rl/Leg_Jumping/scripts/rsl_rl/play.py --task Leg-Jumping-v0 --num_envs 1'
 ```
 
-IMPORTANT: run `isact` before running anything to source your environment
+IMPORTANT: run `isact` before running anything to source your environment,
+
 Now run `iltrain` to train leg jumping, and `ilplay` to play the most recent trained policy
 
 # Understanding the repo
 
 The repo has a ton of subdirectories, most of which are boilerplate fluff. 
 
-Navigate to `source/Leg_Jumping/Leg_Jumping/data`. Here, you can find our urdf files and usd files. URDF files are imported from the ROS project, and is easy to interchange. However, isaac lab doesn't use URDF, but rather USD to describe the robot. But good news: isaac lab has a built-in way of converting directly from urdf to usd! TODO: I'll put the command here
+Navigate to `source/Leg_Jumping/Leg_Jumping/data`. Here, you can find our urdf files and usd files. 
+
+URDF files are imported from the ROS project, and is easy to interchange. However, isaac lab doesn't use URDF, but rather USD to describe the robot. But good news: isaac lab has a built-in way of converting directly from urdf to usd! TODO: I'll put the command here later, but for now just use the existing USD files.
 
 Now navigate to `source/Leg_Jumping/Leg_Jumping/tasks/manager_based`. Here, you can see `dog_walking` and `leg_jumping` (self-explanatory). We'll dissect `leg_jumping`, but `dog_walking` is just the same thing with different configs. 
 Go into `leg_jumping`. We'll explore some files: 
