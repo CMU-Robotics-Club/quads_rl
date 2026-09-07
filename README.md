@@ -45,6 +45,7 @@ alias ish='~/Documents/laika_rl/IsaacLab/isaaclab.sh'
 alias isact='. ~/Documents/laika_rl/IsaacLab/env_isaaclab/bin/activate'
 alias iltrain='cd ~/Documents/laika_rl/leg_jumping_rl/Leg_Jumping && ish -p scripts/rsl_rl/train.py --task Leg-Jumping-v0 --headless && cd -'
 alias ilplay='ish -p ~/Documents/laika_rl/leg_jumping_rl/Leg_Jumping/scripts/rsl_rl/play.py --task Leg-Jumping-v0 --num_envs 1'
+alias urdf2usd='cd ~/Documents/laika_rl/ && ish -p IsaacLab/scripts/tools/convert_urdf.py leg_jumping_rl/Leg_Jumping/source/Leg_Jumping/Leg_Jumping/data/sliding_leg.urdf leg_jumping_rl/Leg_Jumping/source/Leg_Jumping/Leg_Jumping/data/sliding_leg.usd --fix-base --joint-stiffness 0.0 --joint-damping 0.0 && cd -'
 ```
 
 IMPORTANT: run `isact` before running anything to source your environment,
@@ -59,7 +60,7 @@ The repo has a ton of subdirectories, most of which are boilerplate fluff. Navig
 
 Navigate to `source/Leg_Jumping/Leg_Jumping/data`. Here, you can find our urdf files and usd files. 
 
-URDF files are imported from the ROS project, and is easy to interchange. However, isaac lab doesn't use URDF, but rather USD to describe the robot. But good news: isaac lab has a built-in way of converting directly from urdf to usd! TODO: I'll put the command here later, but for now just use the existing USD files.
+URDF files are imported from the ROS project, and is easy to interchange. However, isaac lab doesn't use URDF, but rather USD to describe the robot. But good news: isaac lab has a built-in way of converting directly from urdf to usd! just run `urdf2usd`, which is an alias we created above
 
 Now navigate to `source/Leg_Jumping/Leg_Jumping/tasks/manager_based`. Here, you can see `dog_walking` and `leg_jumping` (self-explanatory). We'll dissect `leg_jumping`, but `dog_walking` is just the same thing with different configs. 
 Go into `leg_jumping`. We'll explore some files: 
