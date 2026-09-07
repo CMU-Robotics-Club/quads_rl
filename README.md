@@ -1,7 +1,7 @@
 # Quadrupeds Reinforcement Learning!
 
-This repo contains training code for running and testing reinforcement learning.
-This README is written and verified by humans. So please read this carefully!
+## This repo contains training code for running and testing reinforcement learning.
+## This README is written and verified by humans. So please read this carefully!
 
 # Setup
 
