@@ -41,7 +41,7 @@ uv pip install -e source/*
 Your environment is now set up! Now let's make some aliases to make our life easier. Add these to your `~/.bashrc` or `~/.zshrc`:
 
 ```
-alias ish='~/Documents/laika_FL/IsaacLab/isaaclab.sh'
+alias ish='~/Documents/laika_rl/IsaacLab/isaaclab.sh'
 alias isact='. ~/Documents/laika_rl/IsaacLab/env_isaaclab/bin/activate'
 alias iltrain='cd ~/Documents/laika_rl/leg_jumping_rl/Leg_Jumping && ish -p scripts/rsl_rl/train.py --task Leg-Jumping-v0 --headless && cd -'
 alias ilplay='ish -p ~/Documents/laika_rl/leg_jumping_rl/Leg_Jumping/scripts/rsl_rl/play.py --task Leg-Jumping-v0 --num_envs 1'
@@ -53,7 +53,9 @@ Now run `iltrain` to train leg jumping, and `ilplay` to play the most recent tra
 
 # Understanding the repo
 
-The repo has a ton of subdirectories, most of which are boilerplate fluff. 
+Prereq: Do the above setup.
+
+The repo has a ton of subdirectories, most of which are boilerplate fluff. Navigate to this repo's root will be at `cd ~/Documents/laika_rl/leg_jumping_rl/Leg_Jumping/`. You'll never have to go to any other directory.
 
 Navigate to `source/Leg_Jumping/Leg_Jumping/data`. Here, you can find our urdf files and usd files. 
 
