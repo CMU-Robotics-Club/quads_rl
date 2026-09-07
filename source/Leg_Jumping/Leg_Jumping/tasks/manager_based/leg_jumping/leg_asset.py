@@ -1,4 +1,5 @@
-from isaaclab.actuators import IdealPDActuatorCfg, ImplicitActuatorCfg
+import os
+from isaaclab.actuators import IdealPDActuatorCfg, DelayedPDActuatorCfg, ImplicitActuatorCfg
 from isaaclab.assets import ArticulationCfg
 import isaaclab.sim as sim_utils
 
@@ -6,7 +7,7 @@ SLIDING_LEG_CFG = ArticulationCfg(
     prim_path="{ENV_REGEX_NS}/Robot",
 
     spawn=sim_utils.UsdFileCfg(
-        usd_path="/home/quads/Documents/laika_rl/leg_jumping_rl/Leg_Jumping/source/Leg_Jumping/Leg_Jumping/data/sliding_leg.usd",
+        usd_path=os.path.expanduser("~/Documents/laika_rl/leg_jumping_rl/Leg_Jumping/source/Leg_Jumping/Leg_Jumping/data/sliding_leg.usd"),
 
         # May or may not be useful
         activate_contact_sensors=True,
@@ -38,23 +39,43 @@ SLIDING_LEG_CFG = ArticulationCfg(
     soft_joint_pos_limit_factor=0.8, # Reduces physical limits by a factor for safety
 
     actuators = {
-        "leg_actuators": ImplicitActuatorCfg(
+        # "leg_actuators": ImplicitActuatorCfg(
+        #     joint_names_expr=["hip_joint", "knee_joint"],
+        #     effort_limit_sim={
+        #         "hip_joint": 15.0, # Nm
+        #         "knee_joint": 15.0, # Nm
+        #     },
+        #     # TODO: Make these match real pd gains
+        #     velocity_limit_sim=100.0, # rad/s
+        #     stiffness={
+        #         "hip_joint": 30.0,  # Nm/rad
+        #         "knee_joint": 30.0, # Nm/rad
+        #     },
+        #     damping={
+        #         "hip_joint": 2.0, # Nm/rad
+        #         "knee_joint": 2.0, # Nm/rad
+        #     },
+        # ),
+
+        "leg_actuators": DelayedPDActuatorCfg(
             joint_names_expr=["hip_joint", "knee_joint"],
-            effort_limit_sim={
-                "hip_joint": 15.0, # Nm
-                "knee_joint": 15.0, # Nm
-            },
-            # TODO: Make these match real pd gains
-            velocity_limit_sim=100.0, # rad/s
+            # Note: For explicit actuators in Isaac Lab, use 'effort_limit' and 'velocity_limit'
+            effort_limit=15.0,        # Nm
+            velocity_limit=100.0,     # rad/s
             stiffness={
-                "hip_joint": 30.0,  # Nm/rad
-                "knee_joint": 30.0, # Nm/rad
+                "hip_joint": 30.0,    # Nm/rad
+                "knee_joint": 30.0,   # Nm/rad
             },
             damping={
-                "hip_joint": 2.0, # Nm/rad
-                "knee_joint": 2.0, # Nm/rad
+                "hip_joint": 2.0,     # Nm/(rad/s)
+                "knee_joint": 2.0,    # Nm/(rad/s)
             },
+            # Delays are specified in physics steps (sim.dt = 1/240 s ≈ 4.16 ms)
+            # Decimation = 4 (1 policy step = 4 physics steps = 16.67 ms)
+            min_delay=0,  # 0 physics steps (0 ms)
+            max_delay=8,  # 8 physics steps (~33.3 ms = 2 policy steps)
         ),
+
 
         "slider_passive": ImplicitActuatorCfg(
             joint_names_expr=["slider_to_base"],

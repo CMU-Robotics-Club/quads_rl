@@ -24,7 +24,6 @@ from . import mdp
 # Pre-defined configs
 ##
 
-# from isaaclab_assets.robots.cartpole import CARTPOLE_CFG  # isort:skip
 from .leg_asset import SLIDING_LEG_CFG
 
 
@@ -35,7 +34,6 @@ from .leg_asset import SLIDING_LEG_CFG
 
 @configclass
 class LegJumpingSceneCfg(InteractiveSceneCfg):
-    """Configuration for a cart-pole scene."""
 
     # ground plane
     ground = AssetBaseCfg(
@@ -208,7 +206,7 @@ class RewardsCfg:
     action_rate_penalty = RewTerm(
         func=mdp.action_rate_l2,
         # weight=-0.03,
-        weight=-0.1,
+        weight=-0.12,
     )
 
     # # Penalize joint velocities

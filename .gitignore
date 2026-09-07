@@ -11,7 +11,7 @@
 **/.thumbs
 
 # No USD files allowed in the repo
-**/*.usd
+# **/*.usd
 **/*.usda
 **/*.usdc
 **/*.usdz

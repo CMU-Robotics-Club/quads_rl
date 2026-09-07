@@ -24,7 +24,6 @@ from . import mdp
 # Pre-defined configs
 ##
 
-# from isaaclab_assets.robots.cartpole import CARTPOLE_CFG  # isort:skip
 from .dog_asset import DOG_LOC_CFG
 
 
