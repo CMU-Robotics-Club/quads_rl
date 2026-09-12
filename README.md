@@ -37,6 +37,9 @@ cd ~/Documents/laika_rl
 git clone https://github.com/CMU-Robotics-Club/quads_rl leg_jumping_rl/Leg_Jumping
 cd leg_jumping_rl/Leg_Jumping
 uv pip install -e source/*
+
+export TMPDIR="/tmp/$USER"
+mkdir -p "$TMPDIR"
 ```
 
 Your environment is now set up! Now let's make some aliases to make our life easier. Add these to your `~/.bashrc` or `~/.zshrc`:
