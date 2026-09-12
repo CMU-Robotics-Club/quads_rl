@@ -38,13 +38,13 @@ git clone https://github.com/CMU-Robotics-Club/quads_rl leg_jumping_rl/Leg_Jumpi
 cd leg_jumping_rl/Leg_Jumping
 uv pip install -e source/*
 
-export TMPDIR="/tmp/$USER"
 mkdir -p "$TMPDIR"
 ```
 
 Your environment is now set up! Now let's make some aliases to make our life easier. Add these to your `~/.bashrc` or `~/.zshrc`:
 
 ```
+export TMPDIR="/tmp/$USER"
 alias ish='~/Documents/laika_rl/IsaacLab/isaaclab.sh'
 alias isact='. ~/Documents/laika_rl/IsaacLab/env_isaaclab/bin/activate'
 alias iltrain='cd ~/Documents/laika_rl/leg_jumping_rl/Leg_Jumping && ish -p scripts/rsl_rl/train.py --task Leg-Jumping-v0 --headless && cd -'
