@@ -12,7 +12,7 @@ Run every command here sequentially. Some installations may take up to a few min
 ```
 mkdir -p ~/Documents/laika_rl
 cd ~/Documents/laika_rl
-git clone https://github.com/isaac-sim/IsaacLab.git
+git clone -b main https://github.com/isaac-sim/IsaacLab.git
 cd IsaacLab
 
 uv venv env_isaaclab --python 3.11 --seed
