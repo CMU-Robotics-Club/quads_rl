@@ -24,6 +24,7 @@ uv pip install "isaacsim[all,extscache]==5.1.0" \
 uv pip install "setuptools<82" wheel
 uv pip install --no-build-isolation "flatdict==4.0.1"
 uv pip install "numpy==1.26.4"
+pip install --upgrade torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu128 --timeout 1000
 uv pip install --no-build-isolation \
     -e source/isaaclab \
     -e source/isaaclab_assets \
