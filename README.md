@@ -42,8 +42,8 @@ uv pip install -e source/*
 Your environment is now set up! Now let's make some aliases to make our life easier. Add these to the end of your `~/.bashrc` or `~/.zshrc`:
 
 ```
-mkdir -p "$TMPDIR"
 export TMPDIR="/tmp/$USER"
+mkdir -p "$TMPDIR"
 alias ish='~/Documents/laika_rl/IsaacLab/isaaclab.sh'
 alias isact='. ~/Documents/laika_rl/IsaacLab/env_isaaclab/bin/activate'
 alias iltrain='cd ~/Documents/laika_rl/leg_jumping_rl/Leg_Jumping && ish -p scripts/rsl_rl/train.py --task Leg-Jumping-v0 --headless && cd -'
