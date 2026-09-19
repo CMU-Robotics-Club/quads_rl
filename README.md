@@ -37,11 +37,9 @@ cd ~/Documents/laika_rl
 git clone https://github.com/CMU-Robotics-Club/quads_rl leg_jumping_rl/Leg_Jumping
 cd leg_jumping_rl/Leg_Jumping
 uv pip install -e source/*
-
-mkdir -p "$TMPDIR"
 ```
 
-Your environment is now set up! Now let's make some aliases to make our life easier. Add these to your `~/.bashrc` or `~/.zshrc`:
+Your environment is now set up! Now let's make some aliases to make our life easier. Add these to the end of your `~/.bashrc` or `~/.zshrc`:
 
 ```
 export TMPDIR="/tmp/$USER"
@@ -52,9 +50,18 @@ alias ilplay='ish -p ~/Documents/laika_rl/leg_jumping_rl/Leg_Jumping/scripts/rsl
 alias urdf2usd='cd ~/Documents/laika_rl/ && ish -p IsaacLab/scripts/tools/convert_urdf.py leg_jumping_rl/Leg_Jumping/source/Leg_Jumping/Leg_Jumping/data/sliding_leg.urdf leg_jumping_rl/Leg_Jumping/source/Leg_Jumping/Leg_Jumping/data/sliding_leg.usd --fix-base --joint-stiffness 0.0 --joint-damping 0.0 && cd -'
 ```
 
+Now, in your terminal, run this:
+
+```
+source ~/.bashrc
+mkdir -p "$TMPDIR"
+```
+
+We're done!
+
 IMPORTANT: run `isact` before running anything to source your environment,
 
-Now run `iltrain` to train leg jumping, and `ilplay` to play the most recent trained policy
+Now run `iltrain` to train leg jumping, and `ilplay` to play the most recent trained policy. `ilplay` REQUIRES a display, which can be done with X11 forwarding or any other remote desktop protocol, or by running it in-person on the monitors.
 
 # Understanding the repo
 
