@@ -18,20 +18,12 @@ cd IsaacLab
 uv venv env_isaaclab --python 3.11 --seed
 source env_isaaclab/bin/activate
 export UV_HTTP_TIMEOUT=600
-uv pip install "isaacsim[all,extscache]==5.1.0" \
-       --extra-index-url https://pypi.nvidia.com \
-       --index-strategy unsafe-best-match
+uv pip install "isaacsim[all,extscache]==5.1.0" --extra-index-url https://pypi.nvidia.com --index-strategy unsafe-best-match
 uv pip install "setuptools<82" wheel
 uv pip install --no-build-isolation "flatdict==4.0.1"
 uv pip install "numpy==1.26.4"
 pip install --upgrade torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu128 --timeout 1000
-uv pip install --no-build-isolation \
-    -e source/isaaclab \
-    -e source/isaaclab_assets \
-    -e source/isaaclab_tasks \
-    -e source/isaaclab_rl \
-    -e source/isaaclab_mimic \
-    rsl-rl-lib
+uv pip install --no-build-isolation -e source/isaaclab -e source/isaaclab_assets -e source/isaaclab_tasks -e source/isaaclab_rl -e source/isaaclab_mimic rsl-rl-lib
 
 cd ~/Documents/laika_rl
 git clone https://github.com/CMU-Robotics-Club/quads_rl leg_jumping_rl/Leg_Jumping
