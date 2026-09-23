@@ -5,6 +5,8 @@
 
 # Setup
 
+Before we start, type `bash` in your terminal and press enter just in case you're not in bash.
+
 We'll put our code in ~/Documents since that's what I did
 
 Run every command here sequentially. Some installations may take up to a few minutes:
