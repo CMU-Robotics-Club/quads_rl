@@ -55,7 +55,47 @@ We're done!
 
 IMPORTANT: run `isact` before running anything to source your environment,
 
-Now run `iltrain` to train leg jumping, and `ilplay` to play the most recent trained policy. `ilplay` REQUIRES a display, which can be done with X11 forwarding or any other remote desktop protocol, or by running it in-person on the monitors.
+Now run `iltrain` to train leg jumping, and `ilplay` to play the most recent trained policy. Remember to `cd ~/Documents/laika_rl/leg_jumping_rl/Leg_Jumping` before `ilplay`. It looks for the checkpoint in the current directory. `ilplay` REQUIRES a display, which can be done with X11 forwarding or any other remote desktop protocol, or by running it in-person on the monitors.
+
+## Display options
+
+<details>
+<summary>For Macs</summary>
+
+- **In person.** At the machine's monitors: `isact`, `cd ~/Documents/laika_rl/leg_jumping_rl/Leg_Jumping`, then `ilplay`.
+- **X11 forwarding.** Install [XQuartz](https://www.xquartz.org/), then log out of the Mac and back in. In a new Terminal window, `echo $DISPLAY` should contain `org.xquartz`. Then:
+
+  ```
+  ssh -Y <user>@<host>
+  echo $DISPLAY          # localhost:10.0 or similar; stop if this is empty
+  isact
+  cd ~/Documents/laika_rl/leg_jumping_rl/Leg_Jumping
+  ilplay
+  ```
+
+  The window will be choppy. X11 copies each frame to the Mac, and the sim waits on it.
+- **WebRTC.** This stays smooth and still takes mouse and keyboard. Download **Isaac Sim WebRTC Streaming Client 1.1.5** from the [Isaac Sim 5.1.0 downloads](https://docs.isaacsim.omniverse.nvidia.com/5.1.0/installation/download.html) (`macOS (arm64)` on Apple Silicon). Newer clients belong to newer Isaac Sim versions and will not connect. On the machine, add this function below your aliases, then `source ~/.bashrc`:
+
+  ```
+  ilstream() {
+    local cudart
+    cudart="$(python -c 'import pathlib, nvidia.cuda_runtime as c; print(pathlib.Path(c.__file__).resolve().parent / "lib" / "libcudart.so.12")')"
+    LD_PRELOAD="$cudart" PUBLIC_IP="$(hostname -I | awk '{print $1}')" ilplay --livestream 1
+  }
+  ```
+
+  `ilstream` is the function above. It is not one of the shared aliases. On the machine:
+
+  ```
+  isact
+  cd ~/Documents/laika_rl/leg_jumping_rl/Leg_Jumping
+  hostname -I
+  ilstream
+  ```
+
+  `hostname -I` prints the address, and the first one is what `ilstream` advertises. Wait until the terminal prints `Loading model checkpoint`. In the Mac client, replace `127.0.0.1` in the Server field with that address and click Connect. Quit with **File → Exit** in the streamed window, then close the client. There is no password on the stream, so do not leave `ilstream` running. The Mac must be able to reach TCP port 49100 and UDP port 47998 (campus network or VPN).
+
+</details>
 
 # Understanding the repo
 
