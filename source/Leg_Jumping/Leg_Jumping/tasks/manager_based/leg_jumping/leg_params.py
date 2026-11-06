@@ -47,8 +47,13 @@ PRESETS = {
 }
 # same limits, new stand: default (action zero) = stand pose + hold torque / kp, spawn on the floor at the stand pose (L-08, L-09)
 _STAND = dict(default_hip=0.48, default_knee=1.58, spawn_slider=-0.43, stand_hip=0.3, stand_knee=1.5, stand_slider=-0.4435)
-PRESETS["A_STAND"] = replace(PRESETS["A"], name="A_STAND", **_STAND)
+PRESETS["A_STAND"] = replace(PRESETS["A"], name="A_STAND", **_STAND)  # fallback: foot 25 cm ahead of the hip
 PRESETS["B_STAND"] = replace(PRESETS["B"], name="B_STAND", **_STAND)
+# main stand: foot under the hip, 0.50 m of 0.75 m reach, like A1 and ANYmal (L-14, L-15)
+_UNDER = dict(default_hip=0.500, default_knee=1.405, spawn_slider=-0.474, stand_hip=0.55, stand_knee=1.13, stand_slider=-0.4843,
+              depth_per_hip=0.0035, depth_per_knee=0.295)
+PRESETS["A_UNDER"] = replace(PRESETS["A"], name="A_UNDER", **_UNDER)
+PRESETS["B_UNDER"] = replace(PRESETS["B"], name="B_UNDER", **_UNDER)
 
 
 def get_params() -> LegParams:
