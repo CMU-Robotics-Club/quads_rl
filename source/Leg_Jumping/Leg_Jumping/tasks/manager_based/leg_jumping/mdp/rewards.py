@@ -71,3 +71,82 @@ def joint_torque_penalty(env: ManagerBasedRLEnv, asset_cfg: SceneEntityCfg) -> t
     torques = robot.data.applied_torque[:, joint_ids]
     # Square the torques to discourage large spikes in torque
     return torch.sum(torch.square(torques), dim=1)
+
+
+def _jump(env: ManagerBasedRLEnv):
+    return env.command_manager.get_term("jump")
+
+
+def _airborne(env: ManagerBasedRLEnv, force_n: float = 1.0) -> torch.Tensor:
+    f = env.scene["foot_contact"].data.net_forces_w_history.norm(dim=-1).amax(dim=(1, 2))
+    return f < force_n
+
+
+def airborne_flag(env: ManagerBasedRLEnv) -> torch.Tensor:
+    """Privileged: 1 if the foot is off the floor. Critic only."""
+    return _airborne(env).float().unsqueeze(-1)
+
+
+def _joints(env: ManagerBasedRLEnv, asset_cfg: SceneEntityCfg):
+    robot: Articulation = env.scene[asset_cfg.name]
+    names = list(robot.data.joint_names)
+    return robot, names.index("slider_to_base"), names.index("hip_joint"), names.index("knee_joint")
+
+
+def stand_pose(env: ManagerBasedRLEnv, stand_hip: float, stand_knee: float, asset_cfg: SceneEntityCfg) -> torch.Tensor:
+    robot, _, hi, ki = _joints(env, asset_cfg)
+    q = robot.data.joint_pos
+    err = (q[:, hi] - stand_hip) ** 2 + (q[:, ki] - stand_knee) ** 2
+    idle = ~_jump(env).cmd.latch
+    return idle.float() * torch.exp(-err / 0.05)
+
+
+def stand_height(env: ManagerBasedRLEnv, stand_slider: float, asset_cfg: SceneEntityCfg) -> torch.Tensor:
+    robot, si, _, _ = _joints(env, asset_cfg)
+    err = ((robot.data.joint_pos[:, si] - stand_slider) / 0.05) ** 2
+    idle = ~_jump(env).cmd.latch
+    return idle.float() * torch.exp(-err)
+
+
+def false_air(env: ManagerBasedRLEnv) -> torch.Tensor:
+    return ((~_jump(env).cmd.latch) & _airborne(env)).float()
+
+
+def rise_air(env: ManagerBasedRLEnv, stand_slider: float, cap_m: float, asset_cfg: SceneEntityCfg) -> torch.Tensor:
+    robot, si, _, _ = _joints(env, asset_cfg)
+    rise = torch.clamp(robot.data.joint_pos[:, si] - stand_slider, min=0.0, max=cap_m)
+    return _jump(env).cmd.latch.float() * _airborne(env).float() * rise
+
+
+def return_stand_pose(env: ManagerBasedRLEnv, stand_hip: float, stand_knee: float, after_s: float, asset_cfg: SceneEntityCfg) -> torch.Tensor:
+    robot, _, hi, ki = _joints(env, asset_cfg)
+    term = _jump(env)
+    late = term.cmd.latch & (term.cmd.time_since_request > after_s)
+    err = (robot.data.joint_pos[:, hi] - stand_hip) ** 2 + (robot.data.joint_pos[:, ki] - stand_knee) ** 2
+    return late.float() * torch.exp(-err / 0.05)
+
+
+def return_stand_height(env: ManagerBasedRLEnv, stand_slider: float, after_s: float, asset_cfg: SceneEntityCfg) -> torch.Tensor:
+    robot, si, _, _ = _joints(env, asset_cfg)
+    term = _jump(env)
+    late = term.cmd.latch & (term.cmd.time_since_request > after_s)
+    err = ((robot.data.joint_pos[:, si] - stand_slider) / 0.05) ** 2
+    return late.float() * torch.exp(-err)
+
+
+def land_soft(env: ManagerBasedRLEnv, v_ok: float, asset_cfg: SceneEntityCfg) -> torch.Tensor:
+    """Downward slider speed above v_ok on the touchdown step, while a jump is latched."""
+    robot, si, _, _ = _joints(env, asset_cfg)
+    term = _jump(env)
+    air = _airborne(env)
+    touch = term.prev_air & ~air & term.cmd.latch
+    term.prev_air = air
+    down = torch.clamp(-robot.data.joint_vel[:, si] - v_ok, min=0.0)
+    return touch.float() * down
+
+
+def foot_slide(env: ManagerBasedRLEnv, asset_cfg: SceneEntityCfg) -> torch.Tensor:
+    robot: Articulation = env.scene[asset_cfg.name]
+    v = robot.data.body_lin_vel_w[:, asset_cfg.body_ids[0], :2]
+    contact = ~_airborne(env)
+    return contact.float() * torch.sum(torch.square(v), dim=1)

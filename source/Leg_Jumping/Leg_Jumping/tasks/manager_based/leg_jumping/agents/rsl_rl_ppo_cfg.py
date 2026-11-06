@@ -11,16 +11,16 @@ from isaaclab_rl.rsl_rl import RslRlOnPolicyRunnerCfg, RslRlPpoActorCriticCfg, R
 @configclass
 class PPORunnerCfg(RslRlOnPolicyRunnerCfg):
     num_steps_per_env = 96
-    # max_iterations = 150
     max_iterations = 2000
     save_interval = 50
     experiment_name = "leg_jumping_v0"
+    clip_actions = 1.0  # C6: defined range; scale 0.6 so |a|<=1 is +-0.6 rad from the stand
+    obs_groups = {"actor": ["policy"], "critic": ["policy", "critic"]}
     policy = RslRlPpoActorCriticCfg(
-        init_noise_std=1.0,
+        init_noise_std=0.5,  # 0.5 x 0.6 rad x kp 30 ~= 9 N*m of random torque (dog: 1.0 rolled it)
         actor_obs_normalization=False,
         critic_obs_normalization=False,
-        actor_hidden_dims=[32, 32],
-        # critic_hidden_dims=[32, 32],
+        actor_hidden_dims=[64, 64],
         critic_hidden_dims=[64, 64],
         activation="elu",
     )
