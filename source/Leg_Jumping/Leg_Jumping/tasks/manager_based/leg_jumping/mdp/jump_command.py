@@ -13,6 +13,11 @@ def _ids(env_ids, n, device):
     return env_ids.to(device=device, dtype=torch.long)
 
 
+def _writable(t):
+    """Buffers written under torch.inference_mode cannot be updated in place afterwards."""
+    return t.clone() if t.is_inference() else t
+
+
 class JumpCommand:
     def __init__(self, num_envs, device, dt=1 / 60, t_lock=T_LOCK):
         self.n = num_envs
@@ -27,6 +32,7 @@ class JumpCommand:
         return accepted
 
     def reset(self, env_ids=None):
+        self.since = _writable(self.since)
         self.since[_ids(env_ids, self.n, self.since.device)] = self.n_lock + 1
 
     @property
@@ -47,6 +53,7 @@ class ScriptedRequests:
         self.k = torch.zeros(num_envs, dtype=torch.long, device=device)
 
     def reset(self, env_ids=None):
+        self.k = _writable(self.k)
         self.k[_ids(env_ids, self.n, self.dev)] = 0
 
     def poll(self):
@@ -76,6 +83,7 @@ class TrainingRequests:
 
     def reset(self, env_ids=None):
         env_ids = _ids(env_ids, self.n, self.dev)
+        self.next = _writable(self.next)
         self.next[env_ids] = self.k + self._gap(int(env_ids.numel()), allow_never=True)
 
     def poll(self):
@@ -113,5 +121,7 @@ class HeldRequests:
 
     def reset(self, env_ids=None):
         ids = _ids(env_ids, self.n, self.dev)
+        self.held = _writable(self.held)
+        self.last = _writable(self.last)
         self.held[ids] = False
         self.last[ids] = -self.n_hop

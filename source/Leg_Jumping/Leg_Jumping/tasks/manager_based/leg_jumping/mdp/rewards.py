@@ -121,7 +121,7 @@ def rise_air(env: ManagerBasedRLEnv, stand_slider: float, cap_m: float, asset_cf
 def return_stand_pose(env: ManagerBasedRLEnv, stand_hip: float, stand_knee: float, after_s: float, asset_cfg: SceneEntityCfg) -> torch.Tensor:
     robot, _, hi, ki = _joints(env, asset_cfg)
     term = _jump(env)
-    late = term.cmd.latch & (term.cmd.time_since_request > after_s)
+    late = term.cmd.latch & term.hopped & (term.cmd.time_since_request > after_s)
     err = (robot.data.joint_pos[:, hi] - stand_hip) ** 2 + (robot.data.joint_pos[:, ki] - stand_knee) ** 2
     return late.float() * torch.exp(-err / 0.05)
 
@@ -129,20 +129,21 @@ def return_stand_pose(env: ManagerBasedRLEnv, stand_hip: float, stand_knee: floa
 def return_stand_height(env: ManagerBasedRLEnv, stand_slider: float, after_s: float, asset_cfg: SceneEntityCfg) -> torch.Tensor:
     robot, si, _, _ = _joints(env, asset_cfg)
     term = _jump(env)
-    late = term.cmd.latch & (term.cmd.time_since_request > after_s)
+    late = term.cmd.latch & term.hopped & (term.cmd.time_since_request > after_s)
     err = ((robot.data.joint_pos[:, si] - stand_slider) / 0.05) ** 2
     return late.float() * torch.exp(-err)
+
+
+def takeoff(env: ManagerBasedRLEnv) -> torch.Tensor:
+    """1 on the step the foot leaves the floor while a jump is latched."""
+    return _jump(env).takeoff.float()
 
 
 def land_soft(env: ManagerBasedRLEnv, v_ok: float, asset_cfg: SceneEntityCfg) -> torch.Tensor:
     """Downward slider speed above v_ok on the touchdown step, while a jump is latched."""
     robot, si, _, _ = _joints(env, asset_cfg)
-    term = _jump(env)
-    air = _airborne(env)
-    touch = term.prev_air & ~air & term.cmd.latch
-    term.prev_air = air
     down = torch.clamp(-robot.data.joint_vel[:, si] - v_ok, min=0.0)
-    return touch.float() * down
+    return _jump(env).touch.float() * down
 
 
 def foot_slide(env: ManagerBasedRLEnv, asset_cfg: SceneEntityCfg) -> torch.Tensor:

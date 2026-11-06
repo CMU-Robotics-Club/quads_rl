@@ -201,7 +201,7 @@ class EventCfg:
             self.reset_leg_position = EventTerm(
                 func=mdp.reset_to_stand,
                 mode="reset",
-                params={"asset_cfg": SceneEntityCfg("robot"), "params": PARAMS},
+                params={"asset_cfg": SceneEntityCfg("robot")},
             )
 
 @configclass
@@ -225,6 +225,7 @@ class RewardsCfg:
         weight=40.0,
         params={"stand_slider": _STAND_SLIDER, "cap_m": 0.25, "asset_cfg": SceneEntityCfg("robot")},
     )
+    takeoff = RewTerm(func=mdp.takeoff, weight=8.0)
     land_soft = RewTerm(
         func=mdp.land_soft,
         weight=-5.0,
