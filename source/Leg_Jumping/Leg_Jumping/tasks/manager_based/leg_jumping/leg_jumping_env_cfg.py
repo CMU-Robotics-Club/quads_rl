@@ -163,6 +163,15 @@ class EventCfg:
         },
     )
 
+    def __post_init__(self):
+        # presets with a stand pose start on the floor there instead of the old drop
+        if PARAMS.stand_hip is not None:
+            self.reset_leg_position = EventTerm(
+                func=mdp.reset_to_stand,
+                mode="reset",
+                params={"asset_cfg": SceneEntityCfg("robot"), "params": PARAMS},
+            )
+
 @configclass
 class RewardsCfg:
     """Reward terms for the MDP."""

@@ -1,6 +1,6 @@
 """Hardware-dependent numbers in one place. Pick a preset with the LEG_PRESET environment variable."""
 import os
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 
 
 @dataclass(frozen=True)
@@ -18,6 +18,15 @@ class LegParams:
     default_knee: float = 1.1  # rad
     spawn_slider: float = -0.4  # m
     phantom_mass: float | None = None  # kg for base/foot_link; None keeps PhysX's 1 kg default
+    # stand reset (None = old reset: default pose +-0.1 rad, which drops the leg from 10 cm)
+    stand_hip: float | None = None  # rad
+    stand_knee: float | None = None  # rad
+    stand_slider: float = 0.0  # m, foot just on the floor at the stand pose (URDF model, L-08)
+    depth_per_hip: float = 0.254  # m of slider per rad of hip near the stand, so noise cannot push the foot into the floor
+    depth_per_knee: float = 0.080
+    reset_pose_noise: float = 0.03  # rad, hip and knee
+    reset_lift: float = 0.003  # m, always spawn at least this far above the floor
+    reset_lift_noise: float = 0.01  # m, extra upward-only random lift
 
 
 # (low, high) we sweep or randomize over; not used by the env yet
@@ -36,6 +45,10 @@ PRESETS = {
     "A": LegParams("A", phantom_mass=1e-3),  # 15 N*m, phantom masses fixed
     "B": LegParams("B", hip_torque=10.0, knee_torque=6.0, phantom_mass=1e-3),  # real clamp read as joint-side
 }
+# same limits, new stand: default (action zero) = stand pose + hold torque / kp, spawn on the floor at the stand pose (L-08, L-09)
+_STAND = dict(default_hip=0.48, default_knee=1.58, spawn_slider=-0.43, stand_hip=0.3, stand_knee=1.5, stand_slider=-0.4435)
+PRESETS["A_STAND"] = replace(PRESETS["A"], name="A_STAND", **_STAND)
+PRESETS["B_STAND"] = replace(PRESETS["B"], name="B_STAND", **_STAND)
 
 
 def get_params() -> LegParams:
