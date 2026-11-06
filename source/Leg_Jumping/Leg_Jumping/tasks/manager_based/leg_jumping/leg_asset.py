@@ -3,6 +3,8 @@ from isaaclab.actuators import IdealPDActuatorCfg, DelayedPDActuatorCfg, Implici
 from isaaclab.assets import ArticulationCfg
 import isaaclab.sim as sim_utils
 
+from .leg_params import PARAMS as P
+
 SLIDING_LEG_CFG = ArticulationCfg(
     prim_path="{ENV_REGEX_NS}/Robot",
 
@@ -28,9 +30,9 @@ SLIDING_LEG_CFG = ArticulationCfg(
     init_state=ArticulationCfg.InitialStateCfg(
         joint_pos={
             # TODO: need to set these right
-            "slider_to_base": -0.4, # m
-            "hip_joint": 0.4, # Rad
-            "knee_joint": 1.1, # rad
+            "slider_to_base": P.spawn_slider, # m
+            "hip_joint": P.default_hip, # Rad
+            "knee_joint": P.default_knee, # rad
         },
         pos=(0.0, 0.0, 0.0), # Start the robot at ground level z=0, and at (0,0) with respect to its scene
         joint_vel={".*": 0.0}, # Start everything at velocity 0
@@ -60,20 +62,20 @@ SLIDING_LEG_CFG = ArticulationCfg(
         "leg_actuators": DelayedPDActuatorCfg(
             joint_names_expr=["hip_joint", "knee_joint"],
             # Note: For explicit actuators in Isaac Lab, use 'effort_limit' and 'velocity_limit'
-            effort_limit=15.0,        # Nm
+            effort_limit={"hip_joint": P.hip_torque, "knee_joint": P.knee_torque},  # Nm
             velocity_limit=100.0,     # rad/s
             stiffness={
-                "hip_joint": 30.0,    # Nm/rad
-                "knee_joint": 30.0,   # Nm/rad
+                "hip_joint": P.kp_hip,    # Nm/rad
+                "knee_joint": P.kp_knee,  # Nm/rad
             },
             damping={
-                "hip_joint": 2.0,     # Nm/(rad/s)
-                "knee_joint": 2.0,    # Nm/(rad/s)
+                "hip_joint": P.kd_hip,    # Nm/(rad/s)
+                "knee_joint": P.kd_knee,  # Nm/(rad/s)
             },
             # Delays are specified in physics steps (sim.dt = 1/240 s ≈ 4.16 ms)
             # Decimation = 4 (1 policy step = 4 physics steps = 16.67 ms)
-            min_delay=0,  # 0 physics steps (0 ms)
-            max_delay=8,  # 8 physics steps (~33.3 ms = 2 policy steps)
+            min_delay=P.delay_min,  # physics steps
+            max_delay=P.delay_max,  # 8 steps = ~33.3 ms = 2 policy steps
         ),
 
 

@@ -25,6 +25,7 @@ from . import mdp
 ##
 
 from .leg_asset import SLIDING_LEG_CFG
+from .leg_params import PARAMS
 
 
 ##
@@ -112,6 +113,17 @@ class EventCfg:
             "asset_cfg": SceneEntityCfg("robot", body_names=".*"),
             "mass_distribution_params": (0.95, 1.05),
             "operation": "scale",
+        },
+    )
+
+    # must stay after randomize_mass, which resets every body to its default (phantom 1 kg) mass
+    set_phantom_mass = EventTerm(
+        func=mdp.set_body_mass,
+        mode="startup",
+        params={
+            "asset_cfg": SceneEntityCfg("robot", body_names=["base", "foot_link"]),
+            "mass": PARAMS.phantom_mass,
+            "preset": PARAMS.name,
         },
     )
 
