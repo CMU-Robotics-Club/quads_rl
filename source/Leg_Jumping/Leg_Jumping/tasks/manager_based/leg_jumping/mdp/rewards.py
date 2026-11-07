@@ -140,8 +140,13 @@ def takeoff(env: ManagerBasedRLEnv) -> torch.Tensor:
 
 
 def extra_takeoff(env: ManagerBasedRLEnv) -> torch.Tensor:
-    """1 on later leave-floor events in the same 2 s lockout (bounce)."""
+    """1 on a bounce during the lockout, or any leave-floor with the command off."""
     return _jump(env).extra_takeoff.float()
+
+
+def cleared(env: ManagerBasedRLEnv) -> torch.Tensor:
+    """1 on the first step of this flight that body rise reaches the clear line."""
+    return _jump(env).cleared.float()
 
 
 def land_soft(env: ManagerBasedRLEnv, v_ok: float, asset_cfg: SceneEntityCfg) -> torch.Tensor:
