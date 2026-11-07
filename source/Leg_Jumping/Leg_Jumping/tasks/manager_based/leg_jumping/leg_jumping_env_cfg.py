@@ -223,7 +223,7 @@ class RewardsCfg:
     rise_air = RewTerm(
         func=mdp.rise_air,
         weight=160.0,
-        params={"stand_slider": _STAND_SLIDER, "cap_m": 0.25, "floor_m": 0.15, "asset_cfg": SceneEntityCfg("robot")},
+        params={"stand_slider": _STAND_SLIDER, "cap_m": 0.25, "floor_m": 0.15, "after_s": 1.0, "asset_cfg": SceneEntityCfg("robot")},
     )
     takeoff = RewTerm(func=mdp.takeoff, weight=8.0)
     extra_takeoff = RewTerm(func=mdp.extra_takeoff, weight=-4.0)
