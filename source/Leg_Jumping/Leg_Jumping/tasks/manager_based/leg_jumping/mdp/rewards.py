@@ -115,7 +115,7 @@ def false_air(env: ManagerBasedRLEnv) -> torch.Tensor:
 def rise_air(env: ManagerBasedRLEnv, stand_slider: float, cap_m: float, asset_cfg: SceneEntityCfg) -> torch.Tensor:
     robot, si, _, _ = _joints(env, asset_cfg)
     rise = torch.clamp(robot.data.joint_pos[:, si] - stand_slider, min=0.0, max=cap_m)
-    return _jump(env).cmd.latch.float() * _airborne(env).float() * rise
+    return _jump(env).in_first_flight.float() * rise
 
 
 def return_stand_pose(env: ManagerBasedRLEnv, stand_hip: float, stand_knee: float, after_s: float, asset_cfg: SceneEntityCfg) -> torch.Tensor:
@@ -135,8 +135,13 @@ def return_stand_height(env: ManagerBasedRLEnv, stand_slider: float, after_s: fl
 
 
 def takeoff(env: ManagerBasedRLEnv) -> torch.Tensor:
-    """1 on the step the foot leaves the floor while a jump is latched."""
+    """1 on the first leave-floor of this jump request."""
     return _jump(env).takeoff.float()
+
+
+def extra_takeoff(env: ManagerBasedRLEnv) -> torch.Tensor:
+    """1 on later leave-floor events in the same 2 s lockout (bounce)."""
+    return _jump(env).extra_takeoff.float()
 
 
 def land_soft(env: ManagerBasedRLEnv, v_ok: float, asset_cfg: SceneEntityCfg) -> torch.Tensor:

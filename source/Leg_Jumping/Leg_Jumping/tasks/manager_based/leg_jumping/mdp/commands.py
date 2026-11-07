@@ -29,6 +29,8 @@ class JumpCommandTerm(CommandTerm):
         self.prev_air = torch.zeros(n, dtype=torch.bool, device=dev)
         self.hopped = torch.zeros(n, dtype=torch.bool, device=dev)
         self.takeoff = torch.zeros(n, dtype=torch.bool, device=dev)
+        self.extra_takeoff = torch.zeros(n, dtype=torch.bool, device=dev)
+        self.in_first_flight = torch.zeros(n, dtype=torch.bool, device=dev)
         self.touch = torch.zeros(n, dtype=torch.bool, device=dev)
 
     @property
@@ -39,13 +41,15 @@ class JumpCommandTerm(CommandTerm):
         self.cmd.reset(env_ids)
         self.src.reset(env_ids)
         ids = slice(None) if env_ids is None else env_ids
-        for name in ("prev_air", "hopped", "takeoff", "touch", "_command"):
+        for name in ("prev_air", "hopped", "takeoff", "extra_takeoff", "in_first_flight", "touch", "_command"):
             t = getattr(self, name)
             if t.is_inference():
                 setattr(self, name, t.clone())
         self.prev_air[ids] = False
         self.hopped[ids] = False
         self.takeoff[ids] = False
+        self.extra_takeoff[ids] = False
+        self.in_first_flight[ids] = False
         self.touch[ids] = False
         self._command[ids] = 0.0
         return {}
@@ -60,12 +64,19 @@ class JumpCommandTerm(CommandTerm):
         f = self._env.scene["foot_contact"].data.net_forces_w_history.norm(dim=-1).amax(dim=(1, 2))
         air = f < 1.0
         latch = self.cmd.latch
-        if self.hopped.is_inference():
-            self.hopped = self.hopped.clone()
-        self.takeoff = (~self.prev_air) & air & latch
-        self.touch = self.prev_air & ~air & latch
+        for name in ("hopped", "in_first_flight"):
+            t = getattr(self, name)
+            if t.is_inference():
+                setattr(self, name, t.clone())
         self.hopped = torch.where(acc, torch.zeros_like(self.hopped), self.hopped)
-        self.hopped = (self.hopped | air) & latch
+        self.in_first_flight = torch.where(acc, torch.zeros_like(self.in_first_flight), self.in_first_flight)
+        leaving = (~self.prev_air) & air & latch
+        landing = self.prev_air & ~air & latch
+        self.takeoff = leaving & ~self.hopped
+        self.extra_takeoff = leaving & self.hopped
+        self.touch = landing
+        self.in_first_flight = (self.in_first_flight | self.takeoff) & ~landing & latch
+        self.hopped = (self.hopped | leaving) & latch
         self.prev_air = air
 
     def _update_metrics(self):

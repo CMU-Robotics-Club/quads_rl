@@ -226,6 +226,7 @@ class RewardsCfg:
         params={"stand_slider": _STAND_SLIDER, "cap_m": 0.25, "asset_cfg": SceneEntityCfg("robot")},
     )
     takeoff = RewTerm(func=mdp.takeoff, weight=8.0)
+    extra_takeoff = RewTerm(func=mdp.extra_takeoff, weight=-4.0)
     land_soft = RewTerm(
         func=mdp.land_soft,
         weight=-5.0,
