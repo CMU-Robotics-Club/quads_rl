@@ -222,12 +222,12 @@ class RewardsCfg:
     false_air = RewTerm(func=mdp.false_air, weight=-2.0)
     rise_air = RewTerm(
         func=mdp.rise_air,
-        weight=40.0,
+        weight=80.0,
         params={"stand_slider": _STAND_SLIDER, "cap_m": 0.25, "asset_cfg": SceneEntityCfg("robot")},
     )
     foot_air = RewTerm(
         func=mdp.foot_air,
-        weight=80.0,
+        weight=0.0,
         params={"rest_z": 0.012, "cap_m": 0.13, "y_scale": 0.08, "max_s": 0.20, "asset_cfg": SceneEntityCfg("robot", body_names=["foot_link"])},
     )
     takeoff = RewTerm(func=mdp.takeoff, weight=8.0)
