@@ -219,15 +219,14 @@ class RewardsCfg:
         weight=1.0,
         params={"stand_slider": _STAND_SLIDER, "asset_cfg": SceneEntityCfg("robot")},
     )
-    false_air = RewTerm(func=mdp.false_air, weight=-4.0)
+    false_air = RewTerm(func=mdp.false_air, weight=-2.0)
     rise_air = RewTerm(
         func=mdp.rise_air,
-        weight=40.0,
-        params={"stand_slider": _STAND_SLIDER, "cap_m": 0.25, "asset_cfg": SceneEntityCfg("robot")},
+        weight=160.0,
+        params={"stand_slider": _STAND_SLIDER, "cap_m": 0.25, "floor_m": 0.15, "asset_cfg": SceneEntityCfg("robot")},
     )
     takeoff = RewTerm(func=mdp.takeoff, weight=8.0)
     extra_takeoff = RewTerm(func=mdp.extra_takeoff, weight=-4.0)
-    cleared = RewTerm(func=mdp.cleared, weight=10.0)
     land_soft = RewTerm(
         func=mdp.land_soft,
         weight=-5.0,

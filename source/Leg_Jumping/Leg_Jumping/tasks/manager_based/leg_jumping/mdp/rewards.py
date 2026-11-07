@@ -112,10 +112,11 @@ def false_air(env: ManagerBasedRLEnv) -> torch.Tensor:
     return ((~_jump(env).cmd.latch) & _airborne(env)).float()
 
 
-def rise_air(env: ManagerBasedRLEnv, stand_slider: float, cap_m: float, asset_cfg: SceneEntityCfg) -> torch.Tensor:
+def rise_air(env: ManagerBasedRLEnv, stand_slider: float, cap_m: float, asset_cfg: SceneEntityCfg, floor_m: float = 0.0) -> torch.Tensor:
     robot, si, _, _ = _joints(env, asset_cfg)
-    rise = torch.clamp(robot.data.joint_pos[:, si] - stand_slider, min=0.0, max=cap_m)
-    return _jump(env).in_first_flight.float() * rise
+    rise = robot.data.joint_pos[:, si] - stand_slider
+    paid = torch.clamp(rise - floor_m, min=0.0, max=cap_m - floor_m)
+    return _jump(env).in_first_flight.float() * paid
 
 
 def return_stand_pose(env: ManagerBasedRLEnv, stand_hip: float, stand_knee: float, after_s: float, asset_cfg: SceneEntityCfg) -> torch.Tensor:
@@ -140,13 +141,8 @@ def takeoff(env: ManagerBasedRLEnv) -> torch.Tensor:
 
 
 def extra_takeoff(env: ManagerBasedRLEnv) -> torch.Tensor:
-    """1 on a bounce during the lockout, or any leave-floor with the command off."""
+    """1 on later leave-floor events in the same 2 s lockout (bounce)."""
     return _jump(env).extra_takeoff.float()
-
-
-def cleared(env: ManagerBasedRLEnv) -> torch.Tensor:
-    """1 on the first step of this flight that body rise reaches the clear line."""
-    return _jump(env).cleared.float()
 
 
 def land_soft(env: ManagerBasedRLEnv, v_ok: float, asset_cfg: SceneEntityCfg) -> torch.Tensor:
