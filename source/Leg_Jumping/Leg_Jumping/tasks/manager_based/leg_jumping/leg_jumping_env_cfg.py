@@ -228,7 +228,7 @@ class RewardsCfg:
     foot_air = RewTerm(
         func=mdp.foot_air,
         weight=80.0,
-        params={"rest_z": 0.012, "cap_m": 0.13, "y_scale": 0.08, "asset_cfg": SceneEntityCfg("robot", body_names=["foot_link"])},
+        params={"rest_z": 0.012, "cap_m": 0.13, "y_scale": 0.08, "max_s": 0.20, "asset_cfg": SceneEntityCfg("robot", body_names=["foot_link"])},
     )
     takeoff = RewTerm(func=mdp.takeoff, weight=8.0)
     extra_takeoff = RewTerm(func=mdp.extra_takeoff, weight=-4.0)

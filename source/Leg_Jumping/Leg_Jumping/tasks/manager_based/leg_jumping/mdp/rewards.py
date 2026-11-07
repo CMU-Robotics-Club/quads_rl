@@ -118,13 +118,15 @@ def rise_air(env: ManagerBasedRLEnv, stand_slider: float, cap_m: float, asset_cf
     return _jump(env).in_first_flight.float() * rise
 
 
-def foot_air(env: ManagerBasedRLEnv, rest_z: float, cap_m: float, asset_cfg: SceneEntityCfg, y_scale: float = 0.08) -> torch.Tensor:
-    """Foot height on first flight, scaled down if the foot swings off the rail."""
+def foot_air(env: ManagerBasedRLEnv, rest_z: float, cap_m: float, asset_cfg: SceneEntityCfg, y_scale: float = 0.08, max_s: float = 0.20) -> torch.Tensor:
+    """Foot height on the first ~200 ms of first flight, scaled down if the foot swings off the rail."""
     robot: Articulation = env.scene[asset_cfg.name]
     p = robot.data.body_pos_w[:, asset_cfg.body_ids[0], :] - env.scene.env_origins
     clear = torch.clamp(p[:, 2] - rest_z, min=0.0, max=cap_m)
     align = torch.exp(-(p[:, 1] / y_scale) ** 2)
-    return _jump(env).in_first_flight.float() * clear * align
+    term = _jump(env)
+    early = term.flight_s <= max_s
+    return term.in_first_flight.float() * early.float() * clear * align
 
 
 def return_stand_pose(env: ManagerBasedRLEnv, stand_hip: float, stand_knee: float, after_s: float, asset_cfg: SceneEntityCfg) -> torch.Tensor:
