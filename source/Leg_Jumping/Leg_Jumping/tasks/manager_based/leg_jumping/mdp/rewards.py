@@ -112,13 +112,18 @@ def false_air(env: ManagerBasedRLEnv) -> torch.Tensor:
     return ((~_jump(env).cmd.latch) & _airborne(env)).float()
 
 
-def rise_air(env: ManagerBasedRLEnv, stand_slider: float, cap_m: float, asset_cfg: SceneEntityCfg, floor_m: float = 0.0, after_s: float = 1.0) -> torch.Tensor:
+def rise_air(env: ManagerBasedRLEnv, stand_slider: float, cap_m: float, asset_cfg: SceneEntityCfg) -> torch.Tensor:
     robot, si, _, _ = _joints(env, asset_cfg)
-    term = _jump(env)
-    rise = robot.data.joint_pos[:, si] - stand_slider
-    paid = torch.clamp(rise - floor_m, min=0.0, max=cap_m - floor_m)
-    early = term.cmd.time_since_request < after_s
-    return term.in_first_flight.float() * early.float() * paid
+    rise = torch.clamp(robot.data.joint_pos[:, si] - stand_slider, min=0.0, max=cap_m)
+    return _jump(env).in_first_flight.float() * rise
+
+
+def foot_air(env: ManagerBasedRLEnv, rest_z: float, cap_m: float, asset_cfg: SceneEntityCfg) -> torch.Tensor:
+    """Foot height above the standing rest, only on the first flight."""
+    robot: Articulation = env.scene[asset_cfg.name]
+    z = robot.data.body_pos_w[:, asset_cfg.body_ids[0], 2] - env.scene.env_origins[:, 2]
+    clear = torch.clamp(z - rest_z, min=0.0, max=cap_m)
+    return _jump(env).in_first_flight.float() * clear
 
 
 def return_stand_pose(env: ManagerBasedRLEnv, stand_hip: float, stand_knee: float, after_s: float, asset_cfg: SceneEntityCfg) -> torch.Tensor:
