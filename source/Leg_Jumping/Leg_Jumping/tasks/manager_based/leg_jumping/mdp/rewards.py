@@ -113,11 +113,9 @@ def false_air(env: ManagerBasedRLEnv) -> torch.Tensor:
 
 
 def rise_air(env: ManagerBasedRLEnv, stand_slider: float, cap_m: float, asset_cfg: SceneEntityCfg) -> torch.Tensor:
-    """Body rise on first flight, only while the slider is still going up."""
     robot, si, _, _ = _joints(env, asset_cfg)
     rise = torch.clamp(robot.data.joint_pos[:, si] - stand_slider, min=0.0, max=cap_m)
-    going_up = robot.data.joint_vel[:, si] > 0.0
-    return _jump(env).in_first_flight.float() * going_up.float() * rise
+    return _jump(env).in_first_flight.float() * rise
 
 
 def foot_air(env: ManagerBasedRLEnv, rest_z: float, cap_m: float, asset_cfg: SceneEntityCfg, y_scale: float = 0.08, max_s: float = 0.20) -> torch.Tensor:

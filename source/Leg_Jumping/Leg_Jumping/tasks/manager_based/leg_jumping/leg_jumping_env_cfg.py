@@ -104,8 +104,11 @@ class ObservationsCfg:
         jump_command = ObsTerm(func=mdp.generated_commands, params={"command_name": "jump"})
 
         def __post_init__(self) -> None:
-            self.enable_corruption = True # Randomized noise TODO enable
+            self.enable_corruption = True
             self.concatenate_terms = True
+            # Real leg has no contact/height; infer stance from the last 10 control steps.
+            self.history_length = 10
+            self.flatten_history_dim = True
 
     @configclass
     class CriticCfg(ObsGroup):
@@ -222,7 +225,7 @@ class RewardsCfg:
     false_air = RewTerm(func=mdp.false_air, weight=-2.0)
     rise_air = RewTerm(
         func=mdp.rise_air,
-        weight=80.0,
+        weight=40.0,
         params={"stand_slider": _STAND_SLIDER, "cap_m": 0.25, "asset_cfg": SceneEntityCfg("robot")},
     )
     foot_air = RewTerm(
