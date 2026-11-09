@@ -112,6 +112,15 @@ def false_air(env: ManagerBasedRLEnv) -> torch.Tensor:
     return ((~_jump(env).cmd.latch) & _airborne(env)).float()
 
 
+def idle_still(env: ManagerBasedRLEnv, v_scale: float, asset_cfg: SceneEntityCfg) -> torch.Tensor:
+    """Pay when the command is off, the foot is down, and the slider is not moving."""
+    robot, si, _, _ = _joints(env, asset_cfg)
+    idle = ~_jump(env).cmd.latch
+    contact = ~_airborne(env)
+    v = robot.data.joint_vel[:, si] / v_scale
+    return idle.float() * contact.float() * torch.exp(-(v ** 2))
+
+
 def rise_air(env: ManagerBasedRLEnv, stand_slider: float, cap_m: float, asset_cfg: SceneEntityCfg) -> torch.Tensor:
     robot, si, _, _ = _joints(env, asset_cfg)
     rise = torch.clamp(robot.data.joint_pos[:, si] - stand_slider, min=0.0, max=cap_m)
