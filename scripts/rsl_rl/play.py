@@ -34,6 +34,12 @@ parser.add_argument(
     help="Use the pre-trained checkpoint from Nucleus.",
 )
 parser.add_argument("--real-time", action="store_true", default=False, help="Run in real-time, if possible.")
+parser.add_argument(
+    "--jump_mode",
+    default=None,
+    choices=["train", "eval", "hold", "watch"],
+    help="Jump request source. Default watch for Leg-Jumping (stand until Enter/J).",
+)
 # append RSL-RL cli arguments
 cli_args.add_rsl_rl_args(parser)
 # append AppLauncher cli args
@@ -62,6 +68,7 @@ installed_version = metadata.version("rsl-rl-lib")
 """Rest everything follows."""
 
 import os
+import threading
 import time
 
 import gymnasium as gym
@@ -133,6 +140,12 @@ def main(env_cfg: ManagerBasedRLEnvCfg | DirectRLEnvCfg | DirectMARLEnvCfg, agen
     # set the log directory for the environment (works for all environment types)
     env_cfg.log_dir = log_dir
 
+    # Leg-Jumping play: stand until a request (train.py still uses mode=train).
+    if hasattr(env_cfg, "commands") and hasattr(env_cfg.commands, "jump"):
+        env_cfg.commands.jump.mode = args_cli.jump_mode or "watch"
+        env_cfg.episode_length_s = max(float(env_cfg.episode_length_s), 3600.0)
+        print(f"[INFO] Jump command mode: {env_cfg.commands.jump.mode}")
+
     # create isaac environment
     env = gym.make(args_cli.task, cfg=env_cfg, render_mode="rgb_array" if args_cli.video else None)
 
@@ -198,6 +211,8 @@ def main(env_cfg: ManagerBasedRLEnvCfg | DirectRLEnvCfg | DirectMARLEnvCfg, agen
 
     dt = env.unwrapped.step_dt
 
+    _attach_jump_watch(env)
+
     # reset environment
     obs = env.get_observations()
     timestep = 0
@@ -228,6 +243,48 @@ def main(env_cfg: ManagerBasedRLEnvCfg | DirectRLEnvCfg | DirectMARLEnvCfg, agen
 
     # close the simulator
     env.close()
+
+
+def _attach_jump_watch(env):
+    """Stand until Enter (this terminal) or J (stream window). Space is Isaac pause."""
+    try:
+        term = env.unwrapped.command_manager.get_term("jump")
+    except Exception:
+        return
+    src = getattr(term, "src", None)
+    if src is None or not hasattr(src, "pulse"):
+        return
+
+    keep = []
+
+    def pulse(where):
+        src.pulse()
+        print(f"[jump] request ({where})", flush=True)
+
+    def read_enter():
+        for _ in sys.stdin:
+            pulse("Enter")
+
+    keep.append(threading.Thread(target=read_enter, daemon=True))
+    keep[-1].start()
+    print("[jump] watch: stand until you ask. Enter in this terminal, or J in the stream. Space pauses.", flush=True)
+    try:
+        import carb
+        import omni.appwindow
+
+        iface = carb.input.acquire_input_interface()
+        kb = omni.appwindow.get_default_app_window().get_keyboard()
+
+        def on_key(event, *args):
+            if event.type == carb.input.KeyboardEventType.KEY_PRESS and event.input.name == "J":
+                pulse("J")
+            return True
+
+        keep.append(iface.subscribe_to_keyboard_events(kb, on_key))
+        print("[jump] J in the stream window is also wired.", flush=True)
+    except Exception as ex:
+        print(f"[jump] stream key J not available ({type(ex).__name__}: {ex}); use Enter here.", flush=True)
+    env._jump_watch_keep = keep  # prevent GC of the subscription
 
 
 if __name__ == "__main__":

@@ -98,6 +98,24 @@ class TrainingRequests:
         self.next[idx] = self.k + (self.n_lock - 1) + self._gap(int(idx.numel()), allow_never=False)
 
 
+class WatchRequests:
+    """One hop per pulse. Keyboard/terminal set a Python flag; poll() runs on the sim thread."""
+
+    def __init__(self, num_envs, device):
+        self.n, self.dev = num_envs, device
+        self._hit = False
+
+    def pulse(self):
+        self._hit = True
+
+    def poll(self):
+        hit, self._hit = self._hit, False
+        return torch.full((self.n,), hit, dtype=torch.bool, device=self.dev)
+
+    def reset(self, env_ids=None):
+        self._hit = False
+
+
 class HeldRequests:
     def __init__(self, num_envs, device, dt=1 / 60, t_hop=T_LOCK):
         self.n, self.dev = num_envs, device

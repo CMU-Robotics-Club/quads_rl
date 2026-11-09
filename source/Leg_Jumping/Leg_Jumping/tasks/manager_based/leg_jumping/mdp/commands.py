@@ -8,7 +8,7 @@ import torch
 from isaaclab.managers import CommandTerm, CommandTermCfg
 from isaaclab.utils import configclass
 
-from .jump_command import HeldRequests, JumpCommand, ScriptedRequests, TrainingRequests, T_LOCK
+from .jump_command import HeldRequests, JumpCommand, ScriptedRequests, TrainingRequests, WatchRequests, T_LOCK
 
 
 class JumpCommandTerm(CommandTerm):
@@ -23,6 +23,8 @@ class JumpCommandTerm(CommandTerm):
             self.src = ScriptedRequests(cfg.eval_times, n, dev, dt=dt)
         elif cfg.mode == "hold":
             self.src = HeldRequests(n, dev, dt=dt, t_hop=cfg.t_lock)
+        elif cfg.mode == "watch":
+            self.src = WatchRequests(n, dev)
         else:
             raise ValueError(f"JumpCommandCfg.mode={cfg.mode!r}")
         self._command = torch.zeros(n, 2, device=dev)
@@ -97,7 +99,7 @@ class JumpCommandTerm(CommandTerm):
 class JumpCommandCfg(CommandTermCfg):
     class_type: type = JumpCommandTerm
     resampling_time_range: tuple[float, float] = (math.inf, math.inf)
-    mode: str = "train"  # train | eval | hold
+    mode: str = "train"  # train | eval | hold | watch
     t_lock: float = T_LOCK
     idle_s: tuple[float, float] = (0.5, 4.0)
     none_frac: float = 0.1
