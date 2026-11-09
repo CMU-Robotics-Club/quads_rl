@@ -58,3 +58,54 @@ def reset_to_stand(
     pos[:, jn.index("knee_joint")] = p.stand_knee + dk
     vel = torch.rand_like(pos) * (velocity_range[1] - velocity_range[0]) + velocity_range[0]
     asset.write_joint_state_to_sim(pos, vel, env_ids=env_ids)
+
+
+def sample_knee_backlash(
+    env: ManagerBasedEnv,
+    env_ids: torch.Tensor | None,
+    asset_cfg: SceneEntityCfg,
+    min_rad: float,
+    max_rad: float,
+):
+    """Per-env knee encoder slack. 0 means perfect; max_rad is the gap (not the old 7°)."""
+    asset = env.scene[asset_cfg.name]
+    n = env.scene.num_envs
+    dev = asset.device
+    if not hasattr(env, "_knee_backlash"):
+        env._knee_backlash = torch.zeros(n, device=dev)
+        env._knee_enc = torch.zeros(n, device=dev)
+    if env_ids is None:
+        env_ids = torch.arange(n, device=dev)
+    env._knee_backlash[env_ids] = torch.empty(len(env_ids), device=dev).uniform_(min_rad, max_rad)
+    ki = list(asset.joint_names).index("knee_joint")
+    env._knee_enc[env_ids] = asset.data.joint_pos[env_ids, ki]
+
+
+def reset_knee_backlash_state(env: ManagerBasedEnv, env_ids: torch.Tensor, asset_cfg: SceneEntityCfg):
+    """Snap the encoder to the true knee after a reset so we do not start inside a fake gap."""
+    if not hasattr(env, "_knee_enc"):
+        return
+    asset = env.scene[asset_cfg.name]
+    ki = list(asset.joint_names).index("knee_joint")
+    env._knee_enc[env_ids] = asset.data.joint_pos[env_ids, ki]
+
+
+def joint_pos_rel_knee_backlash(env: ManagerBasedEnv, asset_cfg: SceneEntityCfg) -> torch.Tensor:
+    """Hip/knee vs default; knee angle is a hysteresis encoder (slack in env._knee_backlash)."""
+    asset = env.scene[asset_cfg.name]
+    q = asset.data.joint_pos[:, asset_cfg.joint_ids]
+    q_rel = q - asset.data.default_joint_pos[:, asset_cfg.joint_ids]
+    if not hasattr(env, "_knee_backlash"):
+        return q_rel
+    ki = list(asset.joint_names).index("knee_joint")
+    q_true = asset.data.joint_pos[:, ki]
+    half = 0.5 * env._knee_backlash
+    enc = env._knee_enc
+    enc = torch.where(q_true > enc + half, q_true - half, enc)
+    enc = torch.where(q_true < enc - half, q_true + half, enc)
+    env._knee_enc = enc
+    jids = asset_cfg.joint_ids
+    col = ki if jids == slice(None) else list(jids).index(ki) if ki in list(jids) else 1
+    out = q_rel.clone()
+    out[:, col] = enc - asset.data.default_joint_pos[:, ki]
+    return out

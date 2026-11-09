@@ -90,7 +90,7 @@ class ObservationsCfg:
 
         # observation terms (order preserved)
         joint_pos_rel = ObsTerm(
-            func=mdp.joint_pos_rel,
+            func=mdp.joint_pos_rel_knee_backlash,
             params={"asset_cfg": SceneEntityCfg("robot", joint_names=["hip_joint", "knee_joint"])},
             noise=Unoise(n_min=-0.01, n_max=0.01), # rad noise
         )
@@ -185,6 +185,12 @@ class EventCfg:
             "distribution": "uniform",                    # "uniform" or "log_uniform"
         },
     )
+    # Knee encoder slack 0–3° (includes perfect). Not the old-leg 7°. Physics knee is still ideal.
+    randomize_knee_backlash = EventTerm(
+        func=mdp.sample_knee_backlash,
+        mode="startup",
+        params={"asset_cfg": SceneEntityCfg("robot"), "min_rad": 0.0, "max_rad": 0.05},
+    )
 
     # reset
     reset_leg_position = EventTerm(
@@ -196,6 +202,12 @@ class EventCfg:
             "position_range": (-0.1, 0.1),
             "velocity_range": (-0.1, 0.1),
         },
+    )
+
+    reset_knee_encoder = EventTerm(
+        func=mdp.reset_knee_backlash_state,
+        mode="reset",
+        params={"asset_cfg": SceneEntityCfg("robot")},
     )
 
     def __post_init__(self):
