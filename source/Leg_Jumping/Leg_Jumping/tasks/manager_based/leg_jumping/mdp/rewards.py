@@ -120,10 +120,13 @@ def idle_motion(env: ManagerBasedRLEnv, asset_cfg: SceneEntityCfg) -> torch.Tens
     return idle.float() * contact.float() * torch.abs(robot.data.joint_vel[:, si])
 
 
-def rise_air(env: ManagerBasedRLEnv, stand_slider: float, cap_m: float, asset_cfg: SceneEntityCfg) -> torch.Tensor:
+def rise_air(env: ManagerBasedRLEnv, stand_slider: float, cap_m: float, asset_cfg: SceneEntityCfg, y_scale: float = 0.08) -> torch.Tensor:
+    """Body rise on first flight; near zero if the foot is kicked off the rail."""
     robot, si, _, _ = _joints(env, asset_cfg)
     rise = torch.clamp(robot.data.joint_pos[:, si] - stand_slider, min=0.0, max=cap_m)
-    return _jump(env).in_first_flight.float() * rise
+    p = robot.data.body_pos_w[:, asset_cfg.body_ids[0], :] - env.scene.env_origins
+    align = torch.exp(-(p[:, 1] / y_scale) ** 2)
+    return _jump(env).in_first_flight.float() * rise * align
 
 
 def foot_air(env: ManagerBasedRLEnv, rest_z: float, cap_m: float, asset_cfg: SceneEntityCfg, y_scale: float = 0.08, max_s: float = 0.20) -> torch.Tensor:
