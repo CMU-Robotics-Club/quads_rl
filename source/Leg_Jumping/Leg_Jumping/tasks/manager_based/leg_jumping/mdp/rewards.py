@@ -156,6 +156,14 @@ def return_stand_height(env: ManagerBasedRLEnv, stand_slider: float, after_s: fl
     return late.float() * torch.exp(-err)
 
 
+def push_up(env: ManagerBasedRLEnv, cap_mps: float, asset_cfg: SceneEntityCfg) -> torch.Tensor:
+    """Upward slider speed while commanded, foot planted, before first takeoff."""
+    robot, si, _, _ = _joints(env, asset_cfg)
+    term = _jump(env)
+    planted = term.cmd.latch & ~_airborne(env) & ~term.hopped
+    return planted.float() * torch.clamp(robot.data.joint_vel[:, si], min=0.0, max=cap_mps)
+
+
 def takeoff(env: ManagerBasedRLEnv) -> torch.Tensor:
     """1 on the first leave-floor of this jump request."""
     return _jump(env).takeoff.float()
