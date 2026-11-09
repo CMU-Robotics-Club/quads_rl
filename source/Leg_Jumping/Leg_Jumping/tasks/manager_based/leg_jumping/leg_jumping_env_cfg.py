@@ -145,13 +145,14 @@ class EventCfg:
         func=mdp.randomize_rigid_body_mass,
         mode="startup",
         params={
-            "asset_cfg": SceneEntityCfg("robot", body_names=".*"),
+            # Hip, thigh, shin only. Not the 100 kg slider rail, not phantom base/foot.
+            "asset_cfg": SceneEntityCfg("robot", body_names=["hip_link", "upper_link", "lower_link"]),
             "mass_distribution_params": (0.95, 1.05),
             "operation": "scale",
         },
     )
 
-    # must stay after randomize_mass, which resets every body to its default (phantom 1 kg) mass
+    # After mass rand so a future ".*" scale cannot wipe these. Tiny masses PhysX would otherwise set to 1 kg.
     set_phantom_mass = EventTerm(
         func=mdp.set_body_mass,
         mode="startup",
