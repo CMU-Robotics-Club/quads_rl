@@ -250,6 +250,11 @@ class RewardsCfg:
         weight=-5.0,
         params={"v_ok": 1.0, "asset_cfg": SceneEntityCfg("robot")},
     )
+    land_still = RewTerm(
+        func=mdp.land_still,
+        weight=-2.0,
+        params={"after_s": 1.0, "asset_cfg": SceneEntityCfg("robot")},
+    )
     return_stand_pose = RewTerm(
         func=mdp.return_stand_pose,
         weight=1.0,

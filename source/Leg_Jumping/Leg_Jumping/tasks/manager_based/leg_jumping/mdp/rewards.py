@@ -156,6 +156,14 @@ def return_stand_height(env: ManagerBasedRLEnv, stand_slider: float, after_s: fl
     return late.float() * torch.exp(-err)
 
 
+def land_still(env: ManagerBasedRLEnv, after_s: float, asset_cfg: SceneEntityCfg) -> torch.Tensor:
+    """Slider speed after the hop, once it is time to stand still."""
+    robot, si, _, _ = _joints(env, asset_cfg)
+    term = _jump(env)
+    late = term.cmd.latch & term.hopped & (term.cmd.time_since_request > after_s) & ~_airborne(env)
+    return late.float() * torch.abs(robot.data.joint_vel[:, si])
+
+
 def push_up(env: ManagerBasedRLEnv, cap_mps: float, asset_cfg: SceneEntityCfg) -> torch.Tensor:
     """Upward slider speed while commanded, foot planted, before first takeoff."""
     robot, si, _, _ = _joints(env, asset_cfg)
