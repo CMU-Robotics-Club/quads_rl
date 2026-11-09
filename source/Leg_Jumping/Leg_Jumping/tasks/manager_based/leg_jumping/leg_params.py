@@ -51,7 +51,7 @@ PRESETS["A_STAND"] = replace(PRESETS["A"], name="A_STAND", **_STAND)  # fallback
 PRESETS["B_STAND"] = replace(PRESETS["B"], name="B_STAND", **_STAND)
 # main stand: foot under the hip, 0.50 m of 0.75 m reach, like A1 and ANYmal (L-14, L-15)
 _UNDER = dict(default_hip=0.500, default_knee=1.405, spawn_slider=-0.474, stand_hip=0.55, stand_knee=1.13, stand_slider=-0.4843,
-              depth_per_hip=0.0035, depth_per_knee=0.295)
+              depth_per_hip=0.0035, depth_per_knee=0.295, delay_max=0)
 PRESETS["A_UNDER"] = replace(PRESETS["A"], name="A_UNDER", **_UNDER)
 PRESETS["B_UNDER"] = replace(PRESETS["B"], name="B_UNDER", **_UNDER)
 
@@ -64,4 +64,4 @@ def get_params() -> LegParams:
 
 
 PARAMS = get_params()
-print(f"[leg_params] preset {PARAMS.name}")
+print(f"[leg_params] preset {PARAMS.name} delay {PARAMS.delay_min}-{PARAMS.delay_max}")

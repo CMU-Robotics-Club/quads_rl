@@ -74,8 +74,8 @@ SLIDING_LEG_CFG = ArticulationCfg(
             },
             # Delays are specified in physics steps (sim.dt = 1/240 s ≈ 4.16 ms)
             # Decimation = 4 (1 policy step = 4 physics steps = 16.67 ms)
-            min_delay=P.delay_min,  # physics steps
-            max_delay=P.delay_max,  # 8 steps = ~33.3 ms = 2 policy steps
+            min_delay=P.delay_min,  # physics steps (A_UNDER: 0)
+            max_delay=P.delay_max,  # A_UNDER 0 = instant; LEGACY 8 ≈ 33 ms
         ),
 
 
