@@ -73,6 +73,15 @@ def joint_torque_penalty(env: ManagerBasedRLEnv, asset_cfg: SceneEntityCfg) -> t
     return torch.sum(torch.square(torques), dim=1)
 
 
+def torque_spike(env: ManagerBasedRLEnv, frac: float, asset_cfg: SceneEntityCfg) -> torch.Tensor:
+    """|torque| above this fraction of the joint limit. Standing hold is below it."""
+    robot = env.scene[asset_cfg.name]
+    tau = robot.data.applied_torque[:, asset_cfg.joint_ids]
+    lim = robot.data.joint_effort_limits[:, asset_cfg.joint_ids]
+    excess = torch.clamp(torch.abs(tau) - frac * lim, min=0.0)
+    return torch.sum(torch.square(excess), dim=1)
+
+
 def _jump(env: ManagerBasedRLEnv):
     return env.command_manager.get_term("jump")
 

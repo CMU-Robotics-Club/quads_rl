@@ -277,6 +277,11 @@ class RewardsCfg:
         weight=-0.004,
         params={"asset_cfg": SceneEntityCfg("robot", joint_names=["hip_joint", "knee_joint"])},
     )
+    torque_spike = RewTerm(
+        func=mdp.torque_spike,
+        weight=-0.05,
+        params={"frac": 0.7, "asset_cfg": SceneEntityCfg("robot", joint_names=["hip_joint", "knee_joint"])},
+    )
 
 
 @configclass
