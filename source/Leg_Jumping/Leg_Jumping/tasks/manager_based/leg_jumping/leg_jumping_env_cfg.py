@@ -191,6 +191,12 @@ class EventCfg:
         mode="startup",
         params={"asset_cfg": SceneEntityCfg("robot"), "min_rad": 0.0, "max_rad": 0.05},
     )
+    # Constant knee zero error ±2° (includes perfect). Not backlash; not hip.
+    randomize_knee_encoder_offset = EventTerm(
+        func=mdp.sample_knee_encoder_offset,
+        mode="startup",
+        params={"asset_cfg": SceneEntityCfg("robot"), "min_rad": -0.035, "max_rad": 0.035},
+    )
 
     # reset
     reset_leg_position = EventTerm(
@@ -291,7 +297,7 @@ class RewardsCfg:
     )
     torque_spike = RewTerm(
         func=mdp.torque_spike,
-        weight=-0.05,
+        weight=0.0,
         params={"frac": 0.7, "asset_cfg": SceneEntityCfg("robot", joint_names=["hip_joint", "knee_joint"])},
     )
 

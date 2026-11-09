@@ -81,6 +81,24 @@ def sample_knee_backlash(
     env._knee_enc[env_ids] = asset.data.joint_pos[env_ids, ki]
 
 
+def sample_knee_encoder_offset(
+    env: ManagerBasedEnv,
+    env_ids: torch.Tensor | None,
+    asset_cfg: SceneEntityCfg,
+    min_rad: float,
+    max_rad: float,
+):
+    """Per-env constant knee encoder bias. 0 means perfect zero; hip is not offset."""
+    asset = env.scene[asset_cfg.name]
+    n = env.scene.num_envs
+    dev = asset.device
+    if not hasattr(env, "_knee_enc_offset"):
+        env._knee_enc_offset = torch.zeros(n, device=dev)
+    if env_ids is None:
+        env_ids = torch.arange(n, device=dev)
+    env._knee_enc_offset[env_ids] = torch.empty(len(env_ids), device=dev).uniform_(min_rad, max_rad)
+
+
 def reset_knee_backlash_state(env: ManagerBasedEnv, env_ids: torch.Tensor, asset_cfg: SceneEntityCfg):
     """Snap the encoder to the true knee after a reset so we do not start inside a fake gap."""
     if not hasattr(env, "_knee_enc"):
@@ -91,7 +109,7 @@ def reset_knee_backlash_state(env: ManagerBasedEnv, env_ids: torch.Tensor, asset
 
 
 def joint_pos_rel_knee_backlash(env: ManagerBasedEnv, asset_cfg: SceneEntityCfg) -> torch.Tensor:
-    """Hip/knee vs default; knee angle is a hysteresis encoder (slack in env._knee_backlash)."""
+    """Hip/knee vs default; knee is hysteresis encoder plus a constant zero offset."""
     asset = env.scene[asset_cfg.name]
     q = asset.data.joint_pos[:, asset_cfg.joint_ids]
     q_rel = q - asset.data.default_joint_pos[:, asset_cfg.joint_ids]
@@ -107,5 +125,6 @@ def joint_pos_rel_knee_backlash(env: ManagerBasedEnv, asset_cfg: SceneEntityCfg)
     jids = asset_cfg.joint_ids
     col = ki if jids == slice(None) else list(jids).index(ki) if ki in list(jids) else 1
     out = q_rel.clone()
-    out[:, col] = enc - asset.data.default_joint_pos[:, ki]
+    bias = env._knee_enc_offset if hasattr(env, "_knee_enc_offset") else 0.0
+    out[:, col] = enc + bias - asset.data.default_joint_pos[:, ki]
     return out
