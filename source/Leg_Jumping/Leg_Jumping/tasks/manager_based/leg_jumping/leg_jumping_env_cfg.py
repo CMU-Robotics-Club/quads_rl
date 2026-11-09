@@ -223,10 +223,10 @@ class RewardsCfg:
         params={"stand_slider": _STAND_SLIDER, "asset_cfg": SceneEntityCfg("robot")},
     )
     false_air = RewTerm(func=mdp.false_air, weight=-2.0)
-    idle_still = RewTerm(
-        func=mdp.idle_still,
-        weight=1.0,
-        params={"v_scale": 0.005, "asset_cfg": SceneEntityCfg("robot")},
+    idle_motion = RewTerm(
+        func=mdp.idle_motion,
+        weight=-2.0,
+        params={"asset_cfg": SceneEntityCfg("robot")},
     )
     rise_air = RewTerm(
         func=mdp.rise_air,
