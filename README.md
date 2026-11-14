@@ -136,6 +136,18 @@ Train is headless and auto-hops (not watch). It writes a new `logs/` folder and 
 
 When you play the shipped file, the env already randomizes friction, kp/kd ±20%, mass ×0.95–1.05 on **hip / thigh / shin** only (not the 100 kg rail), knee backlash 0–3°, and knee encoder offset ±2°.
 
+**Exam** of that same file, 512 randomized legs, seed 42, scripted requests at 2 s and 8 s (not J). Body rise median 25 cm. Falls: 0.
+
+| Check | Meaning | Result |
+| --- | --- | --- |
+| J1 | Takeoff in 1 s, body up ≥ 20 cm, foot off the floor | 501 / 512 (97.9%) |
+| J2 | Exactly one airborne period per request | 512 / 512 |
+| J3 | No fall | 512 / 512 |
+| J4 | Back in the stand band within 2 s of the request | 414 / 512 (80.9%) |
+| J5 | 20 s idle, no hop | 512 / 512 |
+
+The old 95% bar on **J1–J4 together** is not met, because J4 is 81% (some legs still fidget after landing). J1 and J5 pass. We froze this file anyway: more PPO on this reward set hops but wrecks the sit. The video above is the watchable version.
+
 ## 3. Continuous hopping (not done)
 
 No checkpoint. `HeldRequests` (`mode=hold`) is in the code for later. Play does not bind a hold key, and nothing was trained for a hop burst. (1) and (2) will not machine-gun hops.
