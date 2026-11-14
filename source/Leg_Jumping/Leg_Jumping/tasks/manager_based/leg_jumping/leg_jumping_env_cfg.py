@@ -252,6 +252,7 @@ class RewardsCfg:
         weight=40.0,
         params={"stand_slider": _STAND_SLIDER, "cap_m": 0.25, "y_scale": 0.08, "asset_cfg": SceneEntityCfg("robot", body_names=["foot_link"])},
     )
+    # Left in from an earlier hop; weight 0 so it does not train.
     foot_air = RewTerm(
         func=mdp.foot_air,
         weight=0.0,
@@ -296,6 +297,7 @@ class RewardsCfg:
         weight=-0.004,
         params={"asset_cfg": SceneEntityCfg("robot", joint_names=["hip_joint", "knee_joint"])},
     )
+    # Left in from an earlier hop; weight 0 (it wrecked the sit).
     torque_spike = RewTerm(
         func=mdp.torque_spike,
         weight=0.0,

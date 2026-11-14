@@ -117,6 +117,7 @@ class WatchRequests:
 
 
 class HeldRequests:
+    """Hold-to-repeat hops (mode=hold). Play and train do not use this."""
     def __init__(self, num_envs, device, dt=1 / 60, t_hop=T_LOCK):
         self.n, self.dev = num_envs, device
         self.n_hop = int(round(t_hop / dt))
