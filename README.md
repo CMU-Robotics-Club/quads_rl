@@ -128,6 +128,8 @@ ilstream scripts/rsl_rl/play.py --task Leg-Jumping-v0 --num_envs 1 \
 
 Same checkpoint as (1). After the picture is up: **J** in the stream, or **Enter** in the play terminal. One press → one hop (2 s lockout). **Space** pauses Isaac; it does not jump.
 
+https://github.com/user-attachments/assets/0e86c63d-2381-4593-b6f0-af6f252ad0ea
+
 The hop is trained on a **jump request**, not on a keyboard. Each policy step the actor sees two command values: `latch` (1 for 2 s after an accepted request, else 0) and time since that request. In train, a random idle timer sets request true. In play, J or Enter sets request true. On the real leg, a button or ROS message would set request true the same way. PPO is paid to hop once while `latch` is 1 and to sit while `latch` is 0. The net never observes J, Enter, or ROS; only `latch` and time. If `latch` stays 0, it only sits. Encoders replace sim joint angles; the net still outputs hip and knee position targets for the motor PD. No contact, IMU, or rail on the actor, so the bench does not need those sensors.
 
 Train is headless and auto-hops (not watch). It writes a new `logs/` folder and does **not** replace `a_under_hop.pt`. Scratch `iltrain` is 2000 iters in the PPO cfg, not the shipped ~4800-step file. `--resume` only loads from `logs/…/model_*.pt`, not from `data/policies/`.
